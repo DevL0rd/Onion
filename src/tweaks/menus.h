@@ -704,7 +704,7 @@ void menu_advanced(void *_)
                                      .action = action_advancedSetSwapTriggers},
                                  "Swap the function of L<>L2 and R<>R2\n"
                                  "(only affects in-game actions).");
-        if (DEVICE_ID == MIYOO283) {
+        if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
                                          .label = "Brightness control",
