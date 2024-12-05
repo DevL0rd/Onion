@@ -19,6 +19,9 @@ MODEL_MMP=354
 
 install_ra=1
 
+isWifiMod=0
+[ -f /mnt/SDCARD/.mmWifiMod ] && isWifiMod=1
+
 version() {
     echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
 }
@@ -141,8 +144,13 @@ cleanup() {
 
 DEVICE_ID=0
 
+
 check_device_model() {
-    DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
+    if [ -f /mnt/SDCARD/.mmWifiMod ]; then
+        DEVICE_ID=283
+    else
+        DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
+    fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 }
 

@@ -102,7 +102,7 @@ void menu_datetime(void *_)
 
         network_loadState();
 
-        if (DEVICE_ID == MIYOO354 || network_state.ntp) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI || network_state.ntp) {
             list_addItemWithInfoNote(&_menu_date_time,
                                      (ListItem){
                                          .label = "Set automatically via internet",
@@ -112,7 +112,7 @@ void menu_datetime(void *_)
                                      "Use the internet connection to sync\n"
                                      "date and time on startup.");
         }
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItemWithInfoNote(&_menu_date_time,
                                      (ListItem){
                                          .label = "Wait for sync on startup",
@@ -484,7 +484,7 @@ void menu_blueLight(void *_)
     if (!_menu_user_blue_light._created) {
         network_loadState();
         _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItem(&_menu_user_blue_light,
                          (ListItem){
                              .label = "[DATESTRING]",
@@ -500,7 +500,7 @@ void menu_blueLight(void *_)
                                      .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
                                      .action = action_blueLight},
                                  "Set the selected strength now\n");
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "",
@@ -522,7 +522,7 @@ void menu_blueLight(void *_)
                                      .value = value_blueLightLevel()},
                                  "Change the strength of the \n"
                                  "Blue light filter");
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Time (On)",
@@ -545,7 +545,7 @@ void menu_blueLight(void *_)
                                      "Time schedule for the bluelight filter");
         }
     }
-    if (DEVICE_ID == MIYOO354) {
+    if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
         _writeDateString(_menu_user_blue_light.items[0].label);
         char scheduleToggleLabel[100];
         strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Schedule (ignored)" : "Schedule");
@@ -938,7 +938,7 @@ void menu_main(void)
                          .description = "Startup, save and exit, vibration",
                          .action = menu_system,
                          .icon_ptr = _get_menu_icon("tweaks_system")});
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             list_addItem(&_menu_main,
                          (ListItem){
                              .label = "Network",

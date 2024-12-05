@@ -55,7 +55,7 @@ int battery_getPercentage(void)
 bool battery_isCharging(void)
 {
 #ifdef PLATFORM_MIYOOMINI
-    if (DEVICE_ID == MIYOO283) {
+    if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
         char charging = 0;
         int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 

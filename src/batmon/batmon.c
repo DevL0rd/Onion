@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utils/file.h>
 
 int battery_current_state_duration = 0;
 int best_session_time = 0;
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
                 "Charging stopped: suspended = %d, perc = %d, warn = %d\n",
                 is_suspended, current_percentage, warn_at);
 
-            if (DEVICE_ID == MIYOO283) {
+            if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
                 adc_value_g = updateADCValue(0);
                 current_percentage = batteryPercentage(adc_value_g);
                 saveFakeAxpResult(current_percentage);
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
             config_get("battery/warnAt", CONFIG_INT, &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
-                if (DEVICE_ID == MIYOO283) {
+                if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
                     adc_value_g = updateADCValue(adc_value_g);
                     current_percentage = batteryPercentage(adc_value_g);
                     // Avvoid battery increasing from tiny voltage changes, assume lowest until it drops below it.
@@ -120,7 +121,7 @@ int main(int argc, char *argv[])
                 update_current_duration();
                 // New battery percentage entry
                 log_new_percentage(current_percentage, is_charging);
-                if (DEVICE_ID == MIYOO283) {
+                if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
                     saveFakeAxpResult(current_percentage);
                 }
             }
@@ -165,7 +166,7 @@ static void sigHandler(int sig)
         is_suspended = true;
         break;
     case SIGCONT:
-        if (DEVICE_ID == MIYOO283) {
+        if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
             adc_value_g = updateADCValue(0);
         }
         is_suspended = false;
@@ -459,7 +460,6 @@ int batteryPercentage(int adcValue)
 
     // Interpolate battery percentage from voltage
     float percentage = interpolatePercentage(voltage);
-
     return (int)percentage; //display direct for now
 }
 

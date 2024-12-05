@@ -649,7 +649,7 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_DOWN:
-                if (DEVICE_ID == MIYOO283) {
+                if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
                             // MENU + BTN DOWN : brightness down
@@ -692,7 +692,7 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_UP:
-                if (DEVICE_ID == MIYOO283) {
+                if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
                             // MENU + BTN UP : brightness up
@@ -823,7 +823,7 @@ int main(void)
         }
 
         // Check bluelight filter
-        if (DEVICE_ID == MIYOO354) {
+        if (DEVICE_ID == MIYOO354 || DEVICE_ID == MIYOO283_WIFI) {
             system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
         }
 
