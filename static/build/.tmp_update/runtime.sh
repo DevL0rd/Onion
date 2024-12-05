@@ -8,13 +8,18 @@ logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
 MODEL_MM=283
+MODEL_MMWIFI=696
 MODEL_MMP=354
 screen_resolution="640x480"
 
 main() {
     # Set model ID
     axp 0 > /dev/null
-    export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    if [ -f /mnt/SDCARD/.mmWifiMod ]; then
+        export DEVICE_ID=$MODEL_MMWIFI
+    else
+        export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
     SERIAL_NUMBER=$(read_uuid)
@@ -43,7 +48,7 @@ main() {
     fi
 
     # Check is charging
-    if [ $DEVICE_ID -eq $MODEL_MM ]; then
+    if [ $DEVICE_ID -eq $MODEL_MM || $DEVICE_ID -eq $MODEL_MMWIFI ]; then
         is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
     elif [ $DEVICE_ID -eq $MODEL_MMP ]; then
         axp_status="0x$(axp 0 | cut -d':' -f2)"
@@ -586,7 +591,11 @@ mainui_target=$miyoodir/app/MainUI
 
 mount_main_ui() {
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
-    mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
+    if [ $DEVICE_ID -eq $MODEL_MMWIFI ]; then
+        mainui_srcname="MainUI-$MODEL_MM-$mainui_mode" #Hacked to utilize MMP menu, better would be to create a possibility to enable wifi and OTA in the MM menu or a custom menu for MM_Wifi
+    else
+        mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
+    fi
     mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
 
     if [ "$mainui_mount" != "$mainui_srcname" ]; then
@@ -608,7 +617,7 @@ mount_main_ui() {
 #   times out after 5 seconds, defaults to 640x480
 #
 get_screen_resolution() {
-    max_attempts=10
+    max_attempts=20
     attempt=0
 
     log "get_screen_resolution: start"
@@ -620,7 +629,7 @@ get_screen_resolution() {
         fi
         log "get_screen_resolution: attempt $attempt failed"
         attempt=$((attempt + 1))
-        sleep 0.5
+        sleep 0.1
     done
 
     if [ -z "$screen_resolution" ]; then
@@ -728,7 +737,7 @@ load_settings() {
     fi
     ln -s /mnt/SDCARD/system.json /appconfigs/system.json
 
-    if [ $DEVICE_ID -eq $MODEL_MM ]; then
+    if [ $DEVICE_ID -eq $MODEL_MM || $DEVICE_ID -eq $MODEL_MMWIFI ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
             echo 59 > /sys/class/gpio/export
@@ -812,7 +821,7 @@ runifnecessary() {
     while [ "$a" == "" ] && [ $cnt -lt 8 ]; do
         log "try to run: $2"
         $2 $3 &
-        sleep 0.5
+        sleep 0.01
         cnt=$(expr $cnt + 1)
         a=$(pgrep $1)
     done

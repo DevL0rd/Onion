@@ -15,12 +15,10 @@ export PATH="$sysdir/bin:$PATH"
 unset LD_PRELOAD
 
 MODEL_MM=283
+MODEL_MMWIFI=696
 MODEL_MMP=354
 
 install_ra=1
-
-isWifiMod=0
-[ -f /mnt/SDCARD/.mmWifiMod ] && isWifiMod=1
 
 version() {
     echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
@@ -41,7 +39,7 @@ main() {
     check_install_ra
 
     # Start the battery monitor
-    if [ $DEVICE_ID -eq MODEL_MM ]; then
+    if [ "$DEVICE_ID" -eq "$MODEL_MM" ] || [ "$DEVICE_ID" -eq "$MODEL_MMWIFI" ]; then
         # init charger detection
         gpiodir=/sys/devices/gpiochip0/gpio
         if [ ! -f $gpiodir/gpio59/direction ]; then
@@ -147,7 +145,7 @@ DEVICE_ID=0
 
 check_device_model() {
     if [ -f /mnt/SDCARD/.mmWifiMod ]; then
-        DEVICE_ID=283
+        DEVICE_ID=$MODEL_MMWIFI
     else
         DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
     fi
@@ -308,7 +306,11 @@ run_installation() {
 
     if [ $system_only -ne 1 ]; then
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+            if [ DEVICE_ID -eq $MODEL_MMWIFI ]; then
+                cp -f $sysdir/res/miyoo${$MODEL_MMP}_system.json /mnt/SDCARD/system.json
+            else
+                cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+            fi
         fi
 
         # Start the battery monitor
@@ -355,7 +357,7 @@ run_installation() {
     #                                           Exit                                        #
     #########################################################################################
 
-    if [ $DEVICE_ID -eq MODEL_MM ]; then
+    if [ "$DEVICE_ID" -eq "$MODEL_MM" ] || [ "$DEVICE_ID" -eq "$MODEL_MMWIFI" ]; then
         echo "$verb2 complete!" >> /tmp/.update_msg
         touch $sysdir/.waitConfirm
         touch $sysdir/.installed
@@ -367,7 +369,7 @@ run_installation() {
     installUI &
     sleep 1
 
-    if [ $DEVICE_ID -eq MODEL_MM ]; then
+    if [ "$DEVICE_ID" -eq "$MODEL_MM" ] || [ "$DEVICE_ID" -eq "$MODEL_MMWIFI" ]; then
         counter=10
 
         while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do

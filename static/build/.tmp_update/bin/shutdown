@@ -1,7 +1,7 @@
 #!/bin/sh
-isWifiMod=0
-[ -f /mnt/SDCARD/.mmWifiMod ] && isWifiMod=1
-
+MODEL_MM=283
+MODEL_MMWIFI=696
+MODEL_MMP=354
 
 task_killer() {
 	r=0
@@ -65,7 +65,7 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	if [ "$1" = "-r" ]; then
 		/sbin/reboot
 	else
-		if [ "$(cat /tmp/deviceModel)" = "283" ] || [ "$isWifiMod" -eq 1 ]; then
+		if [ "$(cat /tmp/deviceModel)" = "$MODEL_MM" ] || [ "$(cat /tmp/deviceModel)" = "$MODEL_MMWIFI" ]; then
 			/sbin/reboot # no poweroff command on Miyoo Mini
 		else
 			/sbin/poweroff

@@ -19,12 +19,6 @@ static char DEVICE_SN[12];
 
 void getDeviceModel(void)
 {
-    // if the file /.forceMIYOO283 exists, then set the device model to MIYOO283
-    if (exists("/mnt/SDCARD/.mmWifiMod")) {
-        DEVICE_ID = MIYOO283_WIFI;
-        return;
-    }
-    return;
     FILE *fp;
     file_get(fp, "/tmp/deviceModel", "%d", &DEVICE_ID);
 }

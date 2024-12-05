@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
                 is_suspended, current_percentage, warn_at);
 
             if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
-                adc_value_g = updateADCValue(0);
+                adc_value_g = updateADCValue();
                 current_percentage = batteryPercentage(adc_value_g);
                 saveFakeAxpResult(current_percentage);
             }
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
                 if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
-                    adc_value_g = updateADCValue(adc_value_g);
+                    adc_value_g = updateADCValue();
                     current_percentage = batteryPercentage(adc_value_g);
                     // Avvoid battery increasing from tiny voltage changes, assume lowest until it drops below it.
                     // This is better than assuming the max cpu and screen power consumption and trying to calculate the battery drain.
@@ -167,7 +167,7 @@ static void sigHandler(int sig)
         break;
     case SIGCONT:
         if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
-            adc_value_g = updateADCValue(0);
+            adc_value_g = updateADCValue();
         }
         is_suspended = false;
         break;
@@ -342,7 +342,7 @@ void saveFakeAxpResult(int current_percentage)
 
 #define HISTORY_SIZE 5 // Number of values to smooth battery percentage
 
-int updateADCValue(int value)
+int updateADCValue()
 {
     if (battery_isCharging())
         return 100;
