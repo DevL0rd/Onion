@@ -1,6 +1,7 @@
 #include "batmon.h"
 #include "system/device_model.h"
 #include "utils/process.h"
+#include <linux/i2c-dev.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,10 +69,12 @@ int main(int argc, char *argv[])
                 "Charging stopped: suspended = %d, perc = %d, warn = %d\n",
                 is_suspended, current_percentage, warn_at);
 
-            if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
-                adc_value_g = updateADCValue();
-                current_percentage = batteryPercentage(adc_value_g);
+            if (DEVICE_ID == MIYOO283) {
+                current_percentage = batteryPercentageMM();
                 saveFakeAxpResult(current_percentage);
+            }
+            else if (DEVICE_ID == MIYOO283_WIFI) {
+                current_percentage = batteryPercentageMMWifi();
             }
             else if (DEVICE_ID == MIYOO354) {
                 current_percentage = getBatPercMMP();
@@ -84,17 +87,11 @@ int main(int argc, char *argv[])
             config_get("battery/warnAt", CONFIG_INT, &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
-                if (DEVICE_ID == MIYOO283 || DEVICE_ID == MIYOO283_WIFI) {
-                    adc_value_g = updateADCValue();
-                    current_percentage = batteryPercentage(adc_value_g);
-                    // Avvoid battery increasing from tiny voltage changes, assume lowest until it drops below it.
-                    // This is better than assuming the max cpu and screen power consumption and trying to calculate the battery drain.
-                    if (current_percentage < lowest_percentage_after_charge) {
-                        lowest_percentage_after_charge = current_percentage;
-                    }
-                    else {
-                        current_percentage = lowest_percentage_after_charge;
-                    }
+                if (DEVICE_ID == MIYOO283) {
+                    current_percentage = batteryPercentageMM();
+                }
+                else if (DEVICE_ID == MIYOO283_WIFI) {
+                    current_percentage = batteryPercentageMMWifi();
                 }
                 else if (DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
@@ -106,6 +103,14 @@ int main(int argc, char *argv[])
                     is_suspended, current_percentage, warn_at);
 
                 ticks = -1;
+            }
+            // Avvoid battery increasing from tiny voltage changes, assume lowest until it drops below it.
+            // This is better than assuming the max cpu and screen power consumption and trying to calculate the battery drain.
+            if (current_percentage < lowest_percentage_after_charge) {
+                lowest_percentage_after_charge = current_percentage;
+            }
+            else {
+                current_percentage = lowest_percentage_after_charge;
             }
 
             if (current_percentage != old_percentage) {
@@ -390,6 +395,42 @@ int getBatPercMMP(void)
     return battery_number;
 }
 
+int batteryPercentageMMWifi(void)
+{
+#define AXPDEV "/dev/i2c-1"
+#define AXPID (0x34)
+    static uint32_t mmplus = 2;
+    int axp_fd = open(AXPDEV, O_RDWR);
+    if (axp_fd >= 0) {
+        struct i2c_msg msg[2];
+        struct i2c_rdwr_ioctl_data packets;
+        unsigned char address = 0xB9;
+        unsigned char val;
+        if (mmplus == 2) {
+            ioctl(axp_fd, I2C_TIMEOUT, 5);
+            ioctl(axp_fd, I2C_RETRIES, 1);
+            mmplus = 1;
+        }
+        msg[0].addr = AXPID;
+        msg[0].flags = 0;
+        msg[0].len = 1;
+        msg[0].buf = &address;
+        msg[1].addr = AXPID;
+        msg[1].flags = I2C_M_RD;
+        msg[1].len = 1;
+        msg[1].buf = &val;
+        packets.nmsgs = 2;
+        packets.msgs = &msg[0];
+        int ret = ioctl(axp_fd, I2C_RDWR, &packets);
+        close(axp_fd);
+        if (ret < 0)
+            return 0;
+        else
+            return (val & 0x7f);
+    }
+    return 0;
+}
+
 typedef struct {
     float voltage;
     float percentage;
@@ -443,10 +484,13 @@ float interpolatePercentage(float voltage)
         return 100;
     if (voltage <= VoltageCurveMapping_liion[table_size - 1].voltage)
         return 0;
+    return 0;
 }
 
-int batteryPercentage(int adcValue)
+int batteryPercentageMM()
 {
+    int adcValue = updateADCValue();
+
     if (adcValue == 100) // Charging
         return 500;
 
