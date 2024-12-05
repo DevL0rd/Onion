@@ -59,7 +59,7 @@ int get_current_session_time(void);
 int set_best_session_time(int best_session);
 void saveFakeAxpResult(int current_percentage);
 bool isCharging(void);
-int updateADCValue(int);
+int updateADCValue();
 int getBatPercMMP(void);
 int batteryPercentage(int);
 static void *batteryWarning_thread(void *param);

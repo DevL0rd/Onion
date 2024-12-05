@@ -592,7 +592,7 @@ mainui_target=$miyoodir/app/MainUI
 mount_main_ui() {
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
     if [ $DEVICE_ID -eq $MODEL_MMWIFI ]; then
-        mainui_srcname="MainUI-$MODEL_MM-$mainui_mode" #Hacked to utilize MMP menu, better would be to create a possibility to enable wifi and OTA in the MM menu or a custom menu for MM_Wifi
+        mainui_srcname="MainUI-$MODEL_MMP-$mainui_mode" #Hacked to utilize MMP menu, better would be to create a possibility to enable wifi and OTA in the MM menu or a custom menu for MM_Wifi
     else
         mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
     fi
