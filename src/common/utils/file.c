@@ -41,7 +41,7 @@ bool is_dir(const char *file_path)
 bool file_isModified(const char *path, time_t *old_mtime)
 {
     struct stat64 file_stat;
-    if (stat64(path, &file_stat) == 0 && file_stat.st_mtime > *old_mtime) {
+    if (stat64(path, &file_stat) == 0 && file_stat.st_mtime != *old_mtime) {
         *old_mtime = file_stat.st_mtime;
         return true;
     }

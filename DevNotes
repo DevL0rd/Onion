@@ -1,0 +1,30 @@
+axp_test is a wifi check
+
+/tmp/deviceModel is one set by scripts on startup
+
+look for MainUI
+
+look for PLATFORM_MIYOO
+
+state.h is interesting
+
+
+MODEL_MMP is mmp check for sh files
+
+skipping this change in runtime.sh
+    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
+        touch /tmp/new_res_available
+    else
+        # can't use 752x560 without appropriate firmware or screen
+        screen_resolution="640x480"
+    fi
+
+I chaged this but am unsure:
+        if [ $reset_configs -eq 1 ]; then
+            if [ DEVICE_ID -eq $MODEL_MMWIFI ]; then
+                cp -f $sysdir/res/miyoo${$MODEL_MMP}_system.json /mnt/SDCARD/system.json
+            else
+                cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+            fi
+        fi
+

@@ -102,10 +102,6 @@ int main(int argc, char *argv[])
     if (argc > 1 && strcmp(argv[1], "Boot") != 0)
         temp_flag_set(".offOrder", false);
 
-#ifndef PLATFORM_MIYOOMINI
-    sleep(4); // for debugging purposes
-#endif
-
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
